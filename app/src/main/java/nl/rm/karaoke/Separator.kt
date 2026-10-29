@@ -91,7 +91,7 @@ object Separator {
     }
 
     // ---------- decoding to 44.1 kHz stereo float ----------
-    private fun decode(input: File): Pair<FloatArray, FloatArray> {
+    private fun decode(input: File, l: SepListener): Pair<FloatArray, FloatArray> {
         val ex = MediaExtractor()
         ex.setDataSource(input.absolutePath)
         var track = -1
@@ -109,6 +109,8 @@ object Separator {
         var enc = AudioFormat.ENCODING_PCM_16BIT
         var cap = 1 shl 22
         var data = FloatArray(cap); var n = 0
+        val durUs = if (fmt.containsKey(MediaFormat.KEY_DURATION)) fmt.getLong(MediaFormat.KEY_DURATION) else 0L
+        var lastPct = -1
         val info = MediaCodec.BufferInfo()
         var inDone = false; var outDone = false
         while (!outDone) {
@@ -135,37 +137,55 @@ object Separator {
                 if (enc == AudioFormat.ENCODING_PCM_FLOAT) { for (i in 0 until cnt) data[n++] = ob.float }
                 else { for (i in 0 until cnt) data[n++] = ob.short / 32768f }
                 codec.releaseOutputBuffer(oi, false)
+                if (durUs > 0) { val pct = (info.presentationTimeUs * 100 / durUs).toInt().coerceIn(0, 100); if (pct != lastPct && pct % 5 == 0) { lastPct = pct; l.stage("Nummer inlezen… $pct%") } }
                 if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outDone = true
             }
         }
         codec.stop(); codec.release(); ex.release()
         val frames = n / chs
-        val l = FloatArray(frames); val r = FloatArray(frames)
+        val left = FloatArray(frames); val right = FloatArray(frames)
         for (i in 0 until frames) {
-            l[i] = data[i * chs]
-            r[i] = if (chs > 1) data[i * chs + 1] else l[i]
+            left[i] = data[i * chs]
+            right[i] = if (chs > 1) data[i * chs + 1] else left[i]
         }
-        return if (sr == 44100) Pair(l, r) else Pair(resample(l, sr), resample(r, sr))
+        if (sr == 44100) return Pair(left, right)
+        val a = resample(left, sr) { p -> l.stage("Nummer omzetten… ${(p * 50).toInt()}%") }
+        val b = resample(right, sr) { p -> l.stage("Nummer omzetten… ${(50 + p * 50).toInt()}%") }
+        return Pair(a, b)
     }
 
-    /** windowed-sinc resampler to 44.1 kHz */
-    private fun resample(x: FloatArray, sr: Int): FloatArray {
+    /** fast windowed-sinc resampler to 44.1 kHz (pre-computed kernel table, no trig in the inner loop) */
+    private fun resample(x: FloatArray, sr: Int, onP: (Double) -> Unit): FloatArray {
         val ratio = sr.toDouble() / 44100.0
         val outN = floor(x.size / ratio).toInt()
         val fc = min(1.0, 1.0 / ratio) * 0.97
-        val half = 16
-        val y = FloatArray(outN)
-        for (i in 0 until outN) {
-            val t = i * ratio; val c = floor(t).toInt()
-            var s = 0.0; var ws = 0.0
-            for (j in c - half + 1..c + half) {
-                if (j < 0 || j >= x.size) continue
-                val d = t - j
+        val half = 16; val taps = 2 * half; val phases = 512
+        val table = FloatArray(phases * taps)
+        for (ph in 0 until phases) {
+            val frac = ph.toDouble() / phases
+            var sum = 0.0
+            for (m in 0 until taps) {
+                val d = frac + (half - 1 - m) // distance t - j, j = c - half + 1 + m
                 val sinc = if (d == 0.0) fc else sin(PI * fc * d) / (PI * d)
                 val w = 0.5 + 0.5 * cos(PI * d / half)
-                val k = sinc * w; s += x[j] * k; ws += k
+                val k = sinc * w; table[ph * taps + m] = k.toFloat(); sum += k
             }
-            y[i] = if (ws != 0.0) (s / ws).toFloat() else 0f
+            for (m in 0 until taps) table[ph * taps + m] = (table[ph * taps + m] / sum).toFloat()
+        }
+        val y = FloatArray(outN)
+        val last = x.size - 1
+        for (i in 0 until outN) {
+            if (i and 0xFFFFF == 0) { if (cancel) throw IllegalStateException("cancelled"); onP(i.toDouble() / outN) }
+            val t = i * ratio; val c = t.toInt()
+            val ph = ((t - c) * phases).toInt().coerceAtMost(phases - 1)
+            val base = ph * taps; val j0 = c - half + 1
+            var s = 0f
+            if (j0 >= 0 && j0 + taps - 1 <= last) {
+                for (m in 0 until taps) s += x[j0 + m] * table[base + m]
+            } else {
+                for (m in 0 until taps) { val j = j0 + m; if (j in 0..last) s += x[j] * table[base + m] }
+            }
+            y[i] = s
         }
         return y
     }
@@ -175,7 +195,7 @@ object Separator {
         val sess = ensureModel(ctx, l)
         if (cancel) throw IllegalStateException("cancelled")
         l.stage("Nummer voorbereiden…")
-        val (L, R) = decode(input)
+        val (L, R) = decode(input, l)
         val n = L.size
         val pad = Dsp.GEN - (n % Dsp.GEN)
         val total = Dsp.TRIM + n + pad + Dsp.TRIM
@@ -190,6 +210,7 @@ object Separator {
         val inName = sess.inputNames.first()
         l.stage("Zang verwijderen…")
         for (k in 0 until chunks) {
+            val tk = System.nanoTime()
             if (cancel) throw IllegalStateException("cancelled")
             val i = k * Dsp.GEN
             dsp.stft(mL, mR, i, spec)
@@ -213,6 +234,7 @@ object Separator {
                 l.chunk(k, chunks, cf.name)
             }
             l.progress(k + 1, chunks)
+            if (k == 0) android.util.Log.i("RMKaraoke", "chunk ms=" + (System.nanoTime() - tk) / 1_000_000)
         }
         l.stage("Opslaan…")
         val wav = File(outDir, "inst_$job.wav")
