@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0b0a12">
+<title>RM's Karaoke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0a12; --bg2:#13111f; --card:#1a1729; --card2:#221e36; --line:#2e2947;
+  --txt:#f4f2ff; --mut:#9a94b8; --pink:#ff3d8b; --vio:#8b5cf6; --cyan:#22d3ee; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --grad:linear-gradient(135deg,#ff3d8b 0%,#8b5cf6 55%,#22d3ee 100%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:15px}
+body{min-height:100vh;padding-bottom:84px;background:radial-gradient(900px 500px at 85% -10%,rgba(139,92,246,.22),transparent 60%),radial-gradient(700px 400px at -10% 10%,rgba(255,61,139,.14),transparent 60%),var(--bg)}
+h1,h2,h3{font-family:Sora,Inter,sans-serif;margin:0}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea{font:inherit;color:var(--txt)}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:20;background:rgba(11,10,18,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.05)}
+header.top .wrap{display:flex;align-items:center;gap:12px;height:62px}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 24px rgba(255,61,139,.35)}
+.brand{font-family:Sora;font-weight:800;font-size:19px;letter-spacing:-.3px}
+.brand span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:12px;margin-top:1px}
+.screen{display:none;padding-top:18px;animation:fade .25s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{border-radius:22px;padding:20px;background:linear-gradient(135deg,rgba(255,61,139,.18),rgba(139,92,246,.18) 60%,rgba(34,211,238,.12));border:1px solid rgba(255,255,255,.08);margin-bottom:18px;position:relative;overflow:hidden}
+.hero h2{font-size:22px;letter-spacing:-.4px}
+.hero p{color:#cfc9ea;margin:6px 0 14px;line-height:1.45;font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 18px;border-radius:14px;font-weight:600;font-size:15px;transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--grad);color:#fff;box-shadow:0 8px 26px rgba(255,61,139,.3)}
+.btn.sec{background:var(--card2);border:1px solid var(--line)}
+.btn.ghost{color:var(--mut)}
+.btn.danger{background:rgba(248,113,113,.12);color:var(--bad);border:1px solid rgba(248,113,113,.25)}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.row{display:flex;gap:10px;align-items:center}
+.sp{flex:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px;height:46px;margin-bottom:14px}
+.search input{flex:1;background:none;border:0;outline:0;height:100%}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 10px}
+.sechead h3{font-size:16px}
+.sechead small{color:var(--mut)}
+.track{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);border:1px solid transparent;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s}
+.track:hover{border-color:var(--line);background:var(--card2)}
+.cover{width:52px;height:52px;border-radius:13px;flex:none;display:grid;place-items:center;font-family:Sora;font-weight:800;font-size:18px;color:#fff;position:relative;overflow:hidden}
+.tinfo{flex:1;min-width:0}
+.tinfo b{display:block;font-family:Sora;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tinfo span{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:rgba(52,211,153,.12);color:var(--ok);white-space:nowrap}
+.empty{text-align:center;padding:40px 20px;color:var(--mut);border:1.5px dashed var(--line);border-radius:20px}
+.empty .ico{width:64px;height:64px;margin:0 auto 12px;border-radius:20px;background:var(--card2);display:grid;place-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px}
+.card h3{font-size:15px;margin-bottom:10px}
+label.f{display:block;color:var(--mut);font-size:12px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin:12px 0 6px}
+.inp{width:100%;height:46px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);padding:0 14px;outline:0}
+.inp:focus,textarea.inp:focus{border-color:var(--vio)}
+textarea.inp{height:150px;padding:12px 14px;resize:vertical;line-height:1.5}
+.drop{border:2px dashed var(--line);border-radius:22px;padding:34px 18px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg2)}
+.drop:hover,.drop.over{border-color:var(--pink);background:rgba(255,61,139,.06)}
+.drop .big{width:70px;height:70px;border-radius:22px;background:var(--grad);display:grid;place-items:center;margin:0 auto 14px;box-shadow:0 10px 30px rgba(139,92,246,.35)}
+.drop b{font-family:Sora;font-size:17px;display:block}
+.drop span{color:var(--mut);font-size:13px}
+.wave{width:100%;height:84px;display:block;border-radius:14px;background:var(--bg2);cursor:pointer;touch-action:none}
+.time{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums;margin-top:6px}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:18px;margin:14px 0 6px}
+.cbtn{width:50px;height:50px;border-radius:50%;background:var(--card2);display:grid;place-items:center;border:1px solid var(--line)}
+.play{width:72px;height:72px;border-radius:50%;background:var(--grad);display:grid;place-items:center;box-shadow:0 10px 34px rgba(255,61,139,.4)}
+.seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;height:40px;border-radius:10px;font-weight:600;font-size:14px;color:var(--mut);transition:.2s}
+.seg button.on{background:var(--grad);color:#fff}
+.sl{margin:14px 0 4px}
+.sl .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.sl .lab span{color:var(--mut)}
+.sl .lab b{font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:var(--line);outline:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,61,139,.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 5px rgba(255,61,139,.35)}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.tog small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.sw{width:48px;height:28px;border-radius:99px;background:var(--line);position:relative;transition:.2s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--vio)}.sw.on::after{left:23px}
+.note{display:flex;gap:10px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;margin:12px 0}
+.note.warn{background:rgba(251,191,36,.1);color:#fde68a;border:1px solid rgba(251,191,36,.2)}
+.note.info{background:rgba(34,211,238,.08);color:#a5f3fc;border:1px solid rgba(34,211,238,.18)}
+.note svg{flex:none;margin-top:1px}
+nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(19,17,31,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.06);padding-bottom:env(safe-area-inset-bottom)}
+nav.bot .wrap{display:flex;height:68px}
+nav.bot button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:600;color:var(--mut)}
+nav.bot button.on{color:var(--txt)}
+nav.bot button.on svg{stroke:var(--pink)}
+.mid{position:relative;top:-14px}
+.mid .disc{width:56px;height:56px;border-radius:18px;background:var(--grad);display:grid;place-items:center;box-shadow:0 10px 26px rgba(255,61,139,.4)}
+.mid .disc svg{stroke:#fff!important}
+.stage{position:relative;border-radius:22px;overflow:hidden;background:#07060d;border:1px solid var(--line);margin-bottom:14px}
+.stage canvas{display:block;width:100%;height:120px}
+.stage .ttl{position:absolute;left:16px;right:16px;bottom:14px}
+.stage .ttl h2{font-size:21px;text-shadow:0 2px 12px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage .ttl span{color:#cfc9ea;font-size:13px}
+.mode{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;letter-spacing:.6px;padding:5px 10px;border-radius:99px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12)}
+.mode.k{color:var(--pink)}
+.lyrics{height:46vh;min-height:240px;overflow-y:auto;scroll-behavior:auto;padding:30% 10px;text-align:center;border-radius:20px;background:linear-gradient(#07060d,#100e1b);border:1px solid var(--line);font-family:Sora;font-weight:700;line-height:1.55;-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+.lyrics p{margin:0 0 .5em;color:rgba(244,242,255,.4);transition:color .3s,transform .3s}
+.lyrics p.cur{color:#fff;transform:scale(1.04);text-shadow:0 0 22px rgba(255,61,139,.55)}
+.tabs{display:flex;gap:8px;margin:4px 0 14px}
+.tabs button{padding:8px 14px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--mut)}
+.tabs button.on{color:#fff;border-color:var(--pink);background:rgba(255,61,139,.12)}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(5,4,10,.7);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{width:100%;max-width:680px;background:var(--bg2);border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));animation:up .25s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{font-size:18px;margin-bottom:6px}
+.sheet p{color:var(--mut);margin:0 0 16px;line-height:1.45}
+.sheet .row .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:60;background:#fff;color:#111;font-weight:600;padding:12px 18px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:.3s;pointer-events:none;max-width:90vw;text-align:center;font-size:14px}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.loader{position:fixed;inset:0;z-index:70;background:rgba(5,4,10,.82);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.loader.on{display:flex}
+.eq{display:flex;gap:5px;align-items:flex-end;height:40px}
+.eq i{width:7px;border-radius:4px;background:var(--grad);animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}.eq i:nth-child(4){animation-delay:.45s}.eq i:nth-child(5){animation-delay:.6s}
+@keyframes eq{0%,100%{height:8px}50%{height:40px}}
+.prog{height:10px;border-radius:99px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;margin:12px 0 8px}
+.prog i{display:block;height:100%;width:0;background:var(--grad);border-radius:99px;transition:width .4s}
+.proc{text-align:center;padding:10px 4px}
+.proc b{font-family:Sora;font-size:17px;display:block;margin-top:12px}
+.proc .pinfo{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
+.aibadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;padding:4px 10px;border-radius:99px;background:rgba(139,92,246,.18);color:#c4b5fd;border:1px solid rgba(139,92,246,.35)}
+.yt{display:flex;gap:10px}
+.yt .inp{flex:1}
+.steps{counter-reset:s;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;display:flex;gap:12px;padding:8px 0;color:#d6d1ee;font-size:14px;line-height:1.45}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:9px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--pink)}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line)}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--mut);font-weight:600;margin-bottom:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:99px;background:var(--card2);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--mut)}
+.chip.on{color:#fff;border-color:var(--vio);background:rgba(139,92,246,.18)}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v5"/><path d="M8 22h8"/></svg></div>
+  <div><div class="brand">RM's <span>Karaoke</span></div><div class="sub">Zang eruit. Jij erin.</div></div>
+  <div class="sp"></div>
+  <div id="storeBadge" class="chip" title="Opslag">…</div>
+</div></header>
+
+<main class="wrap">
+
+<!-- LIBRARY -->
+<section class="screen on" id="s-lib">
+  <div class="hero">
+    <h2>Jouw podium staat klaar</h2>
+    <p>Importeer een nummer, haal de zang eruit en zing zelf. Alles wat je opslaat komt in je eigen tracklijst.</p>
+    <button class="btn pri" data-go="imp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nummer importeren</button>
+  </div>
+  <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a94b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Zoek in je tracks…"></div>
+  <div class="sechead"><h3>Mijn tracks</h3><small id="count">0 tracks</small></div>
+  <div id="list"></div>
+</section>
+
+<!-- IMPORT -->
+<section class="screen" id="s-imp">
+  <div id="impPick">
+    <h2 style="font-size:22px;margin-bottom:6px">Nummer importeren</h2>
+    <p style="color:var(--mut);margin:0 0 16px">Kies een audiobestand van je telefoon (MP3, M4A, WAV, OGG, FLAC).</p>
+    <label class="drop" id="drop">
+      <div class="big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+      <b>Tik om een nummer te kiezen</b>
+      <span>of sleep een bestand hierheen</span>
+      <input type="file" id="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac,.aac" hidden>
+    </label>
+    <div class="note info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><div><b>AI-zangverwijdering in studiokwaliteit.</b> Het AI-model draait helemaal op je telefoon. De eerste keer wordt het model geladen (ca. 30 MB). De AI rekent rustig op de processor (niet de grafische chip). Verwerken kan een tijdje duren: houd het scherm aan en blijf in de app.</div></div>
+  </div>
+
+  <div id="impEdit" style="display:none">
+    <button class="back" id="impBack"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>Ander bestand</button>
+    <div class="card">
+      <h3>Trackgegevens</h3>
+      <label class="f">Titel</label><input class="inp" id="eTitle">
+      <label class="f">Artiest</label><input class="inp" id="eArtist">
+    </div>
+    <div class="card">
+      <h3>Zang verwijderen <span class="aibadge" style="margin-left:6px">AI · HQ</span></h3>
+      <div id="eProc"></div>
+      <div id="ePrev" style="display:none">
+      <canvas class="wave" id="eWave"></canvas>
+      <div class="time"><span id="eCur">0:00</span><span id="eDur">0:00</span></div>
+      <div class="ctrls"><button class="play" id="ePlay" style="width:60px;height:60px"></button></div>
+      <div id="eSettings"></div>
+      <div id="eMono"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Songtekst <span style="color:var(--mut);font-weight:400;font-size:13px">(optioneel)</span></h3>
+      <textarea class="inp" id="eLyrics" placeholder="Plak hier de songtekst. Elke regel wordt een karaokeregel."></textarea>
+    </div>
+    <button class="btn pri full" id="eSave"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Opslaan in mijn tracks</button>
+    <div style="height:16px"></div>
+  </div>
+</section>
+
+<!-- YOUTUBE -->
+<section class="screen" id="s-yt">
+  <h2 style="font-size:22px;margin-bottom:6px">YouTube</h2>
+  <p style="color:var(--mut);margin:0 0 16px">Plak een YouTube-link of zoek direct naar een karaokeversie.</p>
+  <div class="card">
+    <label class="f" style="margin-top:0">YouTube-link</label>
+    <div class="yt"><input class="inp" id="ytUrl" placeholder="https://youtu.be/…" inputmode="url"><button class="btn sec" id="ytPaste">Plakken</button></div>
+    <div id="ytInfo"></div>
+    <a class="btn pri full" id="ytOpen" style="margin-top:12px;text-decoration:none;display:none" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Open in YouTube</a>
+  </div>
+  <div class="card">
+    <label class="f" style="margin-top:0">Zoek karaokeversie</label>
+    <div class="yt"><input class="inp" id="ytQ" placeholder="Artiest of titel"><a class="btn pri" id="ytSearch" target="_blank" rel="noopener" style="text-decoration:none">Zoek</a></div>
+    <p style="color:var(--mut);font-size:13px;margin:10px 0 0">Opent YouTube met "&lt;jouw zoekterm&gt; karaoke" — daar staan voor bijna elk nummer al zangloze versies met tekst in beeld.</p>
+  </div>
+  <div class="note warn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><div><b>Waarom niet direct de zang uit een YouTube-video?</b><br>YouTube staat niet toe dat apps het geluid van video's downloaden of bewerken. Daarom opent RM's Karaoke de link in YouTube zelf. Heb je het nummer als bestand (bijv. gekocht of eigen opname)? Importeer het dan hier en haal de zang eruit.</div></div>
+</section>
+
+<!-- PLAYER -->
+<section class="screen" id="s-play">
+  <button class="back" data-go="lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>Mijn tracks</button>
+  <div class="stage"><canvas id="viz"></canvas><div class="mode k" id="modeTag">KARAOKE</div><div class="ttl"><h2 id="pTitle"></h2><span id="pArtist"></span></div></div>
+  <canvas class="wave" id="pWave"></canvas>
+  <div class="time"><span id="pCur">0:00</span><span id="pDur">0:00</span></div>
+  <div class="ctrls">
+    <button class="cbtn" id="pBack10" aria-label="10 sec terug"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><text x="12" y="15.5" font-size="7" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700">10</text></svg></button>
+    <button class="play" id="pPlay"></button>
+    <button class="cbtn" id="pFwd10" aria-label="10 sec vooruit"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/><text x="12" y="15.5" font-size="7" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700">10</text></svg></button>
+  </div>
+  <div class="tabs"><button class="on" data-tab="lyr">Songtekst</button><button data-tab="mix">Geluid</button><button data-tab="info">Track</button></div>
+  <div id="t-lyr">
+    <div class="lyrics" id="lyr"></div>
+    <div class="row" style="margin-top:10px"><span style="color:var(--mut);font-size:13px">Tekstgrootte</span><div class="sp"></div><button class="icon-btn" id="fsMinus">A−</button><button class="icon-btn" id="fsPlus">A+</button></div>
+  </div>
+  <div id="t-mix" style="display:none"><div class="card" id="pSettings"></div><div id="pMono"></div></div>
+  <div id="t-info" style="display:none">
+    <div class="card">
+      <label class="f" style="margin-top:0">Titel</label><input class="inp" id="iTitle">
+      <label class="f">Artiest</label><input class="inp" id="iArtist">
+      <label class="f">Songtekst</label><textarea class="inp" id="iLyrics" placeholder="Plak hier de songtekst"></textarea>
+      <button class="btn sec full" id="iSave" style="margin-top:12px">Wijzigingen opslaan</button>
+    </div>
+    <button class="btn pri full" id="pAI" style="display:none;margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-5 3.9L16.2 20 12 16.8 7.8 20 9 13.9 4 10l6.1-1.2z"/></svg>Opnieuw: zang verwijderen met AI</button>
+    <button class="btn sec full" id="pExport"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>Versie zonder zang downloaden (WAV)</button>
+    <div style="height:10px"></div>
+    <button class="btn danger full" id="pDel">Track verwijderen</button>
+  </div>
+  <div style="height:20px"></div>
+</section>
+
+</main>
+
+<nav class="bot"><div class="wrap">
+  <button data-go="lib" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Tracks</button>
+  <button data-go="imp" class="mid"><div class="disc"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div></button>
+  <button data-go="yt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg>YouTube</button>
+</div></nav>
+
+<div class="modal" id="modal"><div class="sheet"><h3 id="mTitle"></h3><p id="mText"></p><div class="row"><button class="btn sec" id="mNo">Annuleren</button><button class="btn danger" id="mYes">Verwijderen</button></div></div></div>
+<div class="toast" id="toast"></div>
+<div class="loader" id="loader"><div class="eq"><i></i><i></i><i></i><i></i><i></i></div><div id="loadTxt" style="font-weight:600">Bezig…</div></div>
+
+<script src="sep.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
