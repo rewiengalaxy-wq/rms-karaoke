@@ -13,8 +13,19 @@ android {
         versionName = "1.0." + (System.getenv("BUILD_NUMBER") ?: "1")
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
+    signingConfigs {
+        create("fixed") {
+            storeFile = file("rmkaraoke.jks")
+            storePassword = "rmkaraoke"
+            keyAlias = "rmkaraoke"
+            keyPassword = "rmkaraoke"
+        }
+    }
     buildTypes {
-        getByName("debug") { isMinifyEnabled = false }
+        getByName("debug") {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("fixed")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
